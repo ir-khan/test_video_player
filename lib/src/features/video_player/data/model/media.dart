@@ -9,6 +9,6 @@ abstract class Media with _$Media {
     required String title,
     required String path,
     required MediaType mediaType,
-    @Default(false) bool isSelected,
+    required Duration duration,
   }) = _Media;
 }

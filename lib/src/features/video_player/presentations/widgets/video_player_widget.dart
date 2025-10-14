@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:test_video_player/src/extensions/duration.dart';
 import 'package:test_video_player/src/features/video_player/data/model/media.dart';
+import 'package:test_video_player/src/features/video_player/presentations/provider/play_pause_provider.dart';
 import 'package:test_video_player/src/features/video_player/presentations/widgets/icon_container.dart';
-import 'package:test_video_player/src/utils/enums/screen_orientation.dart';
+import 'package:test_video_player/src/mixin/media_query_mixin.dart';
 import 'package:video_player/video_player.dart';
 
-class VideoPlayerWidget extends StatefulWidget {
+class VideoPlayerWidget extends ConsumerStatefulWidget {
   const VideoPlayerWidget({
     super.key,
     required this.media,
@@ -23,15 +26,15 @@ class VideoPlayerWidget extends StatefulWidget {
   final VoidCallback onCompleted;
 
   @override
-  State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
+  ConsumerState<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
 }
 
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget>
+    with MediaQueryMixin {
   late final VideoPlayerController _controller;
   late final ValueNotifier<Duration> _currentVideoPosition;
 
-  /// Extract the Current Orientation from MediaQuery
-  ScreenOrientation _orientation = ScreenOrientation.portraitOnly;
+  /// ✅ Extract the Current Orientation from MediaQuery
   bool _isVisible = false;
   Timer? _buttonsTimer;
 
@@ -39,7 +42,19 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     if (_controller.value.position == _controller.value.duration) {
       widget.onCompleted();
     }
+    ref
+        .read(playPauseProviderProvider.notifier)
+        .setValue(_controller.value.isPlaying);
     _currentVideoPosition.value = _controller.value.position;
+  }
+
+  void _seekForwardOrBackward({required bool isForward}) {
+    final currentPosition = _controller.value.position;
+    final seekDuration = Duration(seconds: 5);
+    Duration targetPosition = isForward
+        ? currentPosition + seekDuration
+        : currentPosition - seekDuration;
+    _controller.seekTo(targetPosition);
   }
 
   @override
@@ -67,26 +82,25 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     return _controller.value.isInitialized
         ? PopScope(
             canPop: false,
-            onPopInvokedWithResult: (value, result) {
-              /// TODO ( Izn ur Rehman ) : Create a single Instance of MediaQuery
-              if (MediaQuery.of(context).orientation == Orientation.landscape) {
-                /// TODO ( Izn ur Rehman ) : We don't need this `setOrientation` function since it is a one line call
-                ///
-                setOrientation(ScreenOrientation.portraitOnly);
+            onPopInvokedWithResult: (value, result) async {
+              /// ✅ TODO ( Izn ur Rehman ) : Create a single Instance of MediaQuery
+              if (orientation == Orientation.landscape) {
+                /// ✅ TODO ( Izn ur Rehman ) : We don't need this `setOrientation` function since it is a one line call
+                await SystemChrome.setPreferredOrientations([
+                  DeviceOrientation.portraitUp,
+                ]);
               }
             },
             child: GestureDetector(
               onTap: () {
                 _isVisible = !_isVisible;
                 if (_isVisible) {
-                  /// TODO ( Izn Ur Rehman ) : Why are we using periodic Timer since it is a one time task
+                  /// ✅ TODO ( Izn Ur Rehman ) : Why are we using periodic Timer since it is a one time task
                   /// and why are we cancelling timer twice?
-                  /// TODO ( Izn ur Rehman ) : The controls are not getting visible when
+                  /// ✅ TODO ( Izn ur Rehman ) : The controls are not getting visible when
                   /// I tap outside of the video Aspect Ratio!
-                  _buttonsTimer = Timer.periodic(Duration(seconds: 3), (timer) {
+                  _buttonsTimer = Timer(Duration(seconds: 3), () {
                     _isVisible = false;
-                    timer.cancel();
-                    _buttonsTimer?.cancel();
                     if (!mounted) return;
                     setState(() {});
                   });
@@ -96,8 +110,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                 if (!mounted) return;
                 setState(() {});
               },
-              child: SizedBox(
-                width: MediaQuery.sizeOf(context).width,
+              child: Container(
+                color: Colors.grey.shade600,
+                width: size.width,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -112,38 +127,42 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                         spacing: 20,
                         children: [
                           IconButton(
-                            onPressed: () {
-                              /// TODO ( Izn ur Rehman ) : Create a reusable single function and use that on forward and reversed seek
-                              Duration currentPosition =
-                                  _controller.value.position;
-                              Duration targetPosition =
-                                  currentPosition - const Duration(seconds: 5);
-                              _controller.seekTo(targetPosition);
-                            },
+                            /// ✅ TODO ( Izn ur Rehman ) : Create a reusable single function and use that on forward and reversed seek
+                            onPressed: () =>
+                                _seekForwardOrBackward(isForward: false),
                             icon: IconContainer(icon: Icons.replay_5_rounded),
                           ),
                           IconButton(
-                            onPressed: () {
-                              _controller.value.isPlaying
-                                  ? _controller.pause()
-                                  : _controller.play();
-                              if (!mounted) return;
-                              setState(() {});
+                            onPressed: () async {
+                              final value = ref.read(playPauseProviderProvider);
+                              if (value) {
+                                ref
+                                    .read(playPauseProviderProvider.notifier)
+                                    .setValue(false);
+                                await _controller.pause();
+                              } else {
+                                ref
+                                    .read(playPauseProviderProvider.notifier)
+                                    .setValue(true);
+                                await _controller.play();
+                              }
                             },
-                            icon: IconContainer(
-                              icon: _controller.value.isPlaying
-                                  ? Icons.pause_rounded
-                                  : Icons.play_arrow_rounded,
+                            icon: Consumer(
+                              builder: (context, ref, child) {
+                                final playPauseValue = ref.watch(
+                                  playPauseProviderProvider,
+                                );
+                                return IconContainer(
+                                  icon: playPauseValue
+                                      ? Icons.pause_rounded
+                                      : Icons.play_arrow_rounded,
+                                );
+                              },
                             ),
                           ),
                           IconButton(
-                            onPressed: () {
-                              Duration currentPosition =
-                                  _controller.value.position;
-                              Duration targetPosition =
-                                  currentPosition + const Duration(seconds: 5);
-                              _controller.seekTo(targetPosition);
-                            },
+                            onPressed: () =>
+                                _seekForwardOrBackward(isForward: true),
                             icon: IconContainer(icon: Icons.forward_5_rounded),
                           ),
                         ],
@@ -154,7 +173,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       child: Positioned(
                         bottom: 0,
                         child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width,
+                          width: size.width,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
@@ -208,19 +227,22 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                                     ],
                                   ),
                                   IconButton(
-                                    onPressed: () {
-                                      /// TODO ( Izn ur Rehman ) : Extract orientation from MediaQuery and remove setOrientation function and call functionality directly
-                                      _orientation =
-                                          _orientation ==
-                                              ScreenOrientation.portraitOnly
-                                          ? ScreenOrientation.landscapeOnly
-                                          : ScreenOrientation.portraitOnly;
-                                      setOrientation(_orientation);
+                                    onPressed: () async {
+                                      /// ✅ TODO ( Izn ur Rehman ) : Extract orientation from MediaQuery and remove setOrientation function and call functionality directly
+                                      orientation == Orientation.portrait
+                                          ? await SystemChrome.setPreferredOrientations(
+                                              [
+                                                DeviceOrientation.landscapeLeft,
+                                                DeviceOrientation
+                                                    .landscapeRight,
+                                              ],
+                                            )
+                                          : await SystemChrome.setPreferredOrientations(
+                                              [DeviceOrientation.portraitUp],
+                                            );
                                     },
                                     icon: IconContainer(
-                                      icon:
-                                          MediaQuery.of(context).orientation ==
-                                              Orientation.portrait
+                                      icon: orientation == Orientation.portrait
                                           ? Icons.fullscreen_rounded
                                           : Icons.fullscreen_exit_rounded,
                                     ),
@@ -241,5 +263,5 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 }
 
-/// TODO ( Izn Ur Rehman ) : When all the videos played and you restart the last video again
+/// ✅ TODO ( Izn Ur Rehman ) : When all the videos played and you restart the last video again
 /// the Icon did not change from Pause to play

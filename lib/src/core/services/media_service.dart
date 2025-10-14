@@ -8,17 +8,15 @@ class MediaService {
   final _picker = ImagePicker();
 
   Future<List<XFile>> pickMedia({MediaType mediaType = MediaType.video}) async {
-    /// TODO ( Izn ur Rehman ) : We don't need an extra variable for selected files
+    /// ✅ TODO ( Izn ur Rehman ) : We don't need an extra variable for selected files
     /// we can directly return them
-    var files = <XFile>[];
     try {
       switch (mediaType) {
         case MediaType.image:
-          files = await _picker.pickMultiImage();
+          return await _picker.pickMultiImage();
         case MediaType.video:
-          files = await _picker.pickMultiVideo();
+          return await _picker.pickMultiVideo();
       }
-      return files;
     } catch (e) {
       rethrow;
     }

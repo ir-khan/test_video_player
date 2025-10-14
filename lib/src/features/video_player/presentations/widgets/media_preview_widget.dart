@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:test_video_player/src/constants/sizes.dart';
+import 'package:test_video_player/src/extensions/duration.dart';
 import 'package:test_video_player/src/features/video_player/data/model/media.dart';
 import 'package:test_video_player/src/utils/enums/media.dart';
 
@@ -9,17 +10,18 @@ class MediaPreviewWidget extends StatelessWidget {
   const MediaPreviewWidget({
     super.key,
     required this.media,
-    required this.onTap, required this.isSelected,
+    required this.onTap,
+    required this.isSelected,
   });
 
   final Media media;
   final bool isSelected;
-  final void Function(bool) onTap;
+  final void Function() onTap;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTap(!media.isSelected),
+      onTap: onTap,
       child: Container(
         padding: kPadding5,
         decoration: BoxDecoration(borderRadius: kRadius20),
@@ -75,9 +77,28 @@ class MediaPreviewWidget extends StatelessWidget {
                     media.title,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
-                  Text(
-                    media.mediaType.toString(),
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                  Row(
+                    spacing: 15,
+                    children: [
+                      Text(
+                        media.mediaType.toString(),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF303030),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          media.duration.format(),
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
