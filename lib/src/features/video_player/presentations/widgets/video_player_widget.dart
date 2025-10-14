@@ -30,6 +30,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late final VideoPlayerController _controller;
   late final ValueNotifier<Duration> _currentVideoPosition;
 
+  /// Extract the Current Orientation from MediaQuery
   ScreenOrientation _orientation = ScreenOrientation.portraitOnly;
   bool _isVisible = false;
   Timer? _buttonsTimer;
@@ -67,7 +68,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         ? PopScope(
             canPop: false,
             onPopInvokedWithResult: (value, result) {
+              /// TODO ( Izn ur Rehman ) : Create a single Instance of MediaQuery
               if (MediaQuery.of(context).orientation == Orientation.landscape) {
+                /// TODO ( Izn ur Rehman ) : We don't need this `setOrientation` function since it is a one line call
+                ///
                 setOrientation(ScreenOrientation.portraitOnly);
               }
             },
@@ -75,6 +79,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               onTap: () {
                 _isVisible = !_isVisible;
                 if (_isVisible) {
+                  /// TODO ( Izn Ur Rehman ) : Why are we using periodic Timer since it is a one time task
+                  /// and why are we cancelling timer twice?
+                  /// TODO ( Izn ur Rehman ) : The controls are not getting visible when
+                  /// I tap outside of the video Aspect Ratio!
                   _buttonsTimer = Timer.periodic(Duration(seconds: 3), (timer) {
                     _isVisible = false;
                     timer.cancel();
@@ -105,6 +113,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                         children: [
                           IconButton(
                             onPressed: () {
+                              /// TODO ( Izn ur Rehman ) : Create a reusable single function and use that on forward and reversed seek
                               Duration currentPosition =
                                   _controller.value.position;
                               Duration targetPosition =
@@ -200,6 +209,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                                   ),
                                   IconButton(
                                     onPressed: () {
+                                      /// TODO ( Izn ur Rehman ) : Extract orientation from MediaQuery and remove setOrientation function and call functionality directly
                                       _orientation =
                                           _orientation ==
                                               ScreenOrientation.portraitOnly
@@ -230,3 +240,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         : SizedBox();
   }
 }
+
+/// TODO ( Izn Ur Rehman ) : When all the videos played and you restart the last video again
+/// the Icon did not change from Pause to play

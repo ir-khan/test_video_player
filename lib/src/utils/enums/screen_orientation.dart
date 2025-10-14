@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart';
 
+/// TODO ( Izn ur Rehman ) : Remove this file we don't need this extra code
+
 enum ScreenOrientation { portraitOnly, landscapeOnly, rotating }
 
 void setOrientation(ScreenOrientation orientation) {

@@ -34,6 +34,8 @@ class _SelectVideosPageState extends ConsumerState<SelectVideosPage> {
 
   @override
   Widget build(BuildContext context) {
+    /// TODO ( Izn ur Rehman ) : Create a single instance of MediaQuery and Use that instance everywhere
+    /// for size use sizeOf and for orientation use orientationOfa
     return Scaffold(
       appBar: MediaQuery.of(context).orientation == Orientation.portrait
           ? AppBarWidget()
@@ -115,6 +117,8 @@ class _SelectVideosPageState extends ConsumerState<SelectVideosPage> {
                         media: media[index],
                         isSelected: media[index] == selectedMedia,
                         onTap: (value) {
+                          /// TODO ( Izn ur Rehman ) : The Below functionality is not correct
+                          /// Please Fix this
                           for (int i = 0; i < media.length; i++) {
                             media[i] = media[i].copyWith(isSelected: false);
                           }
@@ -133,3 +137,6 @@ class _SelectVideosPageState extends ConsumerState<SelectVideosPage> {
     );
   }
 }
+
+/// TODO ( Izn ur Rehman ) : Total duration is not displaying
+/// TODO ( Izn ur Rehman ) : I am unable to select more videos when the video is playing
