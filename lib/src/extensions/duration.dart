@@ -1,6 +1,7 @@
 extension DurationFormat on Duration {
   String format() {
     /// ✅ TODO ( Izn ur Rehman ) : Optimize it further
+    /// New TODO ( Izn ur Rehman ) : it becomes a little complex
     // if (inHours == 0) {
     //   return [
     //     inMinutes.remainder(60),

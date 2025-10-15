@@ -143,3 +143,7 @@ class _SelectVideosPageState extends ConsumerState<SelectVideosPage>
 
 /// ✅ TODO ( Izn ur Rehman ) : Total duration is not displaying
 /// ✅ TODO ( Izn ur Rehman ) : I am unable to select more videos when the video is playing
+
+/// New TODO ( Izn ur Rehman ) : The Time is not displaying correctly when we select videos from Gallery and Also when we play the video the Time is not displaying correctly after the changes you make
+/// New TODO ( Izn ur Rehman ) : If we select same video twice and play the first video and then click on Second video it continues playing the first video and does not switch to new tapped video
+/// New TODO ( Izn ur Rehman ) : I am facing issue while seeking video from progressbar

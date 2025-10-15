@@ -94,6 +94,7 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget>
             child: GestureDetector(
               onTap: () {
                 _isVisible = !_isVisible;
+                /// New TODO ( Izn ur Rehman ) : More changes required here
                 if (_isVisible) {
                   /// ✅ TODO ( Izn Ur Rehman ) : Why are we using periodic Timer since it is a one time task
                   /// and why are we cancelling timer twice?
@@ -126,6 +127,7 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget>
                         mainAxisSize: MainAxisSize.min,
                         spacing: 20,
                         children: [
+                          /// New TODO ( Izn ur Rehman ) : More Optimization Required
                           IconButton(
                             /// ✅ TODO ( Izn ur Rehman ) : Create a reusable single function and use that on forward and reversed seek
                             onPressed: () =>
@@ -134,6 +136,7 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget>
                           ),
                           IconButton(
                             onPressed: () async {
+                              /// New TODO ( Izn ur Rehman ) : More Optimization Required in this function code
                               final value = ref.read(playPauseProviderProvider);
                               if (value) {
                                 ref
@@ -229,6 +232,7 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget>
                                   IconButton(
                                     onPressed: () async {
                                       /// ✅ TODO ( Izn ur Rehman ) : Extract orientation from MediaQuery and remove setOrientation function and call functionality directly
+                                      /// New TODO ( Izn ur Rehman ) : More Optimization Required
                                       orientation == Orientation.portrait
                                           ? await SystemChrome.setPreferredOrientations(
                                               [
