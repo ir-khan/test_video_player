@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:test_video_player/src/constants/sizes.dart';
 import 'package:test_video_player/src/extensions/duration.dart';
 import 'package:test_video_player/src/features/video_player/data/model/media.dart';
+import 'package:test_video_player/src/features/video_player/presentations/widgets/icon_container.dart';
 import 'package:test_video_player/src/utils/enums/media.dart';
 
 class MediaPreviewWidget extends StatelessWidget {
@@ -44,26 +45,14 @@ class MediaPreviewWidget extends StatelessWidget {
                     height: 60,
                     fit: BoxFit.cover,
                   ),
-                  MediaType.video => Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(width: 100, height: 60),
-                      /// New TODO ( Izn ur Rehman ) : Optimize Widget Tree
-                      Positioned(
-                        child: Container(
-                          padding: kPadding5,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color(0xFF303030),
-                          ),
-                          child: Icon(
-                            Icons.play_arrow_rounded,
-                            size: 30,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ),
-                    ],
+
+                  /// ✅ New TODO ( Izn ur Rehman ) : Optimize Widget Tree
+                  MediaType.video => IconContainer(
+                    icon: Icons.play_arrow_rounded,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 25,
+                      vertical: 10,
+                    ),
                   ),
                 },
               ),

@@ -51,7 +51,7 @@ class _SelectVideosPageState extends ConsumerState<SelectVideosPage>
               child: switch (selectedMedia!.mediaType) {
                 MediaType.image => Image.file(File(selectedMedia!.path)),
                 MediaType.video => VideoPlayerWidget(
-                  key: ValueKey(selectedMedia!.title),
+                  key: ValueKey(selectedMedia!.id),
                   media: selectedMedia!,
                   onTapSkipPrevious: () {
                     final index = media.indexOf(selectedMedia!);
@@ -102,7 +102,9 @@ class _SelectVideosPageState extends ConsumerState<SelectVideosPage>
                               pickMediaProvider.future,
                             );
                             if (newMedia.isEmpty) return;
-                            media.addAll(newMedia);
+                            for (final m in newMedia) {
+                              media.add(m.copyWith(id: media.length));
+                            }
                             if (!mounted) return;
                             setState(() {});
                           },
@@ -144,6 +146,6 @@ class _SelectVideosPageState extends ConsumerState<SelectVideosPage>
 /// ✅ TODO ( Izn ur Rehman ) : Total duration is not displaying
 /// ✅ TODO ( Izn ur Rehman ) : I am unable to select more videos when the video is playing
 
-/// New TODO ( Izn ur Rehman ) : The Time is not displaying correctly when we select videos from Gallery and Also when we play the video the Time is not displaying correctly after the changes you make
-/// New TODO ( Izn ur Rehman ) : If we select same video twice and play the first video and then click on Second video it continues playing the first video and does not switch to new tapped video
-/// New TODO ( Izn ur Rehman ) : I am facing issue while seeking video from progressbar
+/// ✅ New TODO ( Izn ur Rehman ) : The Time is not displaying correctly when we select videos from Gallery and Also when we play the video the Time is not displaying correctly after the changes you make
+/// ✅ New TODO ( Izn ur Rehman ) : If we select same video twice and play the first video and then click on Second video it continues playing the first video and does not switch to new tapped video
+/// ✅ New TODO ( Izn ur Rehman ) : I am facing issue while seeking video from progressbar

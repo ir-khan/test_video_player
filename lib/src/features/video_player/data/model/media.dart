@@ -6,6 +6,7 @@ part 'media.freezed.dart';
 @freezed
 abstract class Media with _$Media {
   factory Media({
+    final int? id,
     required String title,
     required String path,
     required MediaType mediaType,
