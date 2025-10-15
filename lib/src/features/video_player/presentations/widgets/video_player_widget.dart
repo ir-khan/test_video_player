@@ -43,6 +43,8 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget>
     _currentVideoPosition.value = value.position;
 
     if (value.position >= value.duration) widget.onCompleted();
+
+    /// New New TODO ( Izn ur Rehman ) : Optimization
     ref.read(playPauseProvider.notifier).setValue(value.isPlaying);
   }
 
@@ -85,188 +87,173 @@ class _VideoPlayerWidgetState extends ConsumerState<VideoPlayerWidget>
 
   @override
   Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (value, result) async {
-              /// ✅ TODO ( Izn ur Rehman ) : Create a single Instance of MediaQuery
-              if (orientation == Orientation.landscape) {
-                /// ✅ TODO ( Izn ur Rehman ) : We don't need this `setOrientation` function since it is a one line call
-                await SystemChrome.setPreferredOrientations([
-                  DeviceOrientation.portraitUp,
-                ]);
-              }
-            },
-            child: GestureDetector(
-              onTap: () {
-                /// ✅ New TODO ( Izn ur Rehman ) : More changes required here
-                /// ✅ TODO ( Izn Ur Rehman ) : Why are we using periodic Timer since it is a one time task
-                /// and why are we cancelling timer twice?
-                /// ✅ TODO ( Izn ur Rehman ) : The controls are not getting visible when
-                /// I tap outside of the video Aspect Ratio!
-                ///
-                _isVisible = !_isVisible;
-                setState(() {});
+    if (_controller.value.isInitialized) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (value, result) async {
+          /// ✅ TODO ( Izn ur Rehman ) : Create a single Instance of MediaQuery
+          if (orientation == Orientation.landscape) {
+            /// ✅ TODO ( Izn ur Rehman ) : We don't need this `setOrientation` function since it is a one line call
+            await SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitUp,
+            ]);
+          }
+        },
+        child: GestureDetector(
+          onTap: () {
+            /// ✅ New TODO ( Izn ur Rehman ) : More changes required here
+            /// ✅ TODO ( Izn Ur Rehman ) : Why are we using periodic Timer since it is a one time task
+            /// and why are we cancelling timer twice?
+            /// ✅ TODO ( Izn ur Rehman ) : The controls are not getting visible when
+            /// I tap outside of the video Aspect Ratio!
+            ///
+            _isVisible = !_isVisible;
+            setState(() {});
 
-                _buttonsTimer?.cancel();
-                if (_isVisible) {
-                  _buttonsTimer = Timer(const Duration(seconds: 3), () {
-                    if (mounted) setState(() => _isVisible = false);
-                  });
-                }
-              },
-              child: Container(
-                color: Colors.grey.shade600,
-                width: size.width,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: VideoPlayer(_controller),
-                    ),
-                    Visibility(
-                      visible: _isVisible,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 20,
-                        children: [
-                          /// ✅ New TODO ( Izn ur Rehman ) : More Optimization Required
-                          /// ✅ TODO ( Izn ur Rehman ) : Create a reusable single function and use that on forward and reversed seek
-                          IconButton(
-                            onPressed: () =>
-                                _seekForwardOrBackword(isForward: false),
-                            icon: const IconContainer(
-                              icon: Icons.replay_5_rounded,
-                            ),
-                          ),
-                          Consumer(
-                            builder: (_, ref, _) {
-                              final playPauseValue = ref.watch(
-                                playPauseProvider,
-                              );
-                              return IconButton(
-                                onPressed: () async {
-                                  /// ✅ New TODO ( Izn ur Rehman ) : More Optimization Required in this function code
-                                  final isPlaying = ref.read(playPauseProvider);
-                                  isPlaying
-                                      ? await _controller.pause()
-                                      : await _controller.play();
-                                  ref
-                                      .read(playPauseProvider.notifier)
-                                      .setValue(!isPlaying);
-                                },
-                                icon: IconContainer(
-                                  icon: playPauseValue
-                                      ? Icons.pause_rounded
-                                      : Icons.play_arrow_rounded,
-                                ),
-                              );
+            _buttonsTimer?.cancel();
+            if (_isVisible) {
+              _buttonsTimer = Timer(const Duration(seconds: 3), () {
+                if (mounted) setState(() => _isVisible = false);
+              });
+            }
+          },
+          child: Container(
+            color: Colors.grey.shade600,
+            width: size.width,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                ),
+                Visibility(
+                  visible: _isVisible,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 20,
+                    children: [
+                      /// ✅ New TODO ( Izn ur Rehman ) : More Optimization Required
+                      /// ✅ TODO ( Izn ur Rehman ) : Create a reusable single function and use that on forward and reversed seek
+                      IconContainer(
+                        onPressed: () =>
+                            _seekForwardOrBackword(isForward: false),
+                        icon: Icons.replay_5_rounded,
+                      ),
+                      Consumer(
+                        builder: (_, ref, _) {
+                          final playPauseValue = ref.watch(playPauseProvider);
+                          return IconContainer(
+                            onPressed: () async {
+                              /// ✅ New TODO ( Izn ur Rehman ) : More Optimization Required in this function code
+                              final isPlaying = ref.read(playPauseProvider);
+                              isPlaying
+                                  ? await _controller.pause()
+                                  : await _controller.play();
+                              ref
+                                  .read(playPauseProvider.notifier)
+                                  .setValue(!isPlaying);
                             },
-                          ),
-                          IconButton(
-                            onPressed: () =>
-                                _seekForwardOrBackword(isForward: false),
-                            icon: const IconContainer(
-                              icon: Icons.forward_5_rounded,
+                            icon: playPauseValue
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                          );
+                        },
+                      ),
+                      IconContainer(
+                        onPressed: () =>
+                            _seekForwardOrBackword(isForward: false),
+                        icon: Icons.forward_5_rounded,
+                      ),
+                    ],
+                  ),
+                ),
+                Visibility(
+                  visible: _isVisible,
+                  child: Positioned(
+                    bottom: 0,
+                    child: SizedBox(
+                      width: size.width,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
+                            child: ValueListenableBuilder(
+                              valueListenable: _currentVideoPosition,
+                              builder: (context, value, child) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFF303030),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    '${value.format()} / ${_controller.value.duration.format()}',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                );
+                              },
                             ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                            child: VideoProgressIndicator(
+                              _controller,
+                              allowScrubbing: true,
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconContainer(
+                                    onPressed: widget.onTapSkipPrevious,
+                                    icon: Icons.skip_previous_rounded,
+                                  ),
+                                  IconContainer(
+                                    onPressed: widget.onTapSkipNext,
+                                    icon: Icons.skip_next_rounded,
+                                  ),
+                                ],
+                              ),
+                              IconContainer(
+                                onPressed: () async {
+                                  /// ✅ TODO ( Izn ur Rehman ) : Extract orientation from MediaQuery and remove setOrientation function and call functionality directly
+                                  /// ✅ New TODO ( Izn ur Rehman ) : More Optimization Required
+                                  await SystemChrome.setPreferredOrientations([
+                                    orientation == Orientation.portrait
+                                        ? DeviceOrientation.landscapeLeft
+                                        : DeviceOrientation.portraitUp,
+                                  ]);
+                                },
+                                icon: orientation == Orientation.portrait
+                                    ? Icons.fullscreen_rounded
+                                    : Icons.fullscreen_exit_rounded,
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                    Visibility(
-                      visible: _isVisible,
-                      child: Positioned(
-                        bottom: 0,
-                        child: SizedBox(
-                          width: size.width,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
-                                child: ValueListenableBuilder(
-                                  valueListenable: _currentVideoPosition,
-                                  builder: (context, value, child) {
-                                    return Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFF303030),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Text(
-                                        '${value.format()} / ${_controller.value.duration.format()}',
-                                        style: TextStyle(color: Colors.white70),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                                child: VideoProgressIndicator(
-                                  _controller,
-                                  allowScrubbing: true,
-                                  padding: EdgeInsets.symmetric(horizontal: 10),
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        onPressed: widget.onTapSkipPrevious,
-                                        icon: IconContainer(
-                                          icon: Icons.skip_previous_rounded,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        onPressed: widget.onTapSkipNext,
-                                        icon: IconContainer(
-                                          icon: Icons.skip_next_rounded,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  IconButton(
-                                    onPressed: () async {
-                                      /// ✅ TODO ( Izn ur Rehman ) : Extract orientation from MediaQuery and remove setOrientation function and call functionality directly
-                                      /// ✅ New TODO ( Izn ur Rehman ) : More Optimization Required
-                                      await SystemChrome.setPreferredOrientations(
-                                        [
-                                          orientation == Orientation.portrait
-                                              ? DeviceOrientation.landscapeLeft
-                                              : DeviceOrientation.portraitUp,
-                                        ],
-                                      );
-                                    },
-                                    icon: IconContainer(
-                                      icon: orientation == Orientation.portrait
-                                          ? Icons.fullscreen_rounded
-                                          : Icons.fullscreen_exit_rounded,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          )
-        : SizedBox();
+          ),
+        ),
+      );
+    } else {
+      return SizedBox();
+    }
   }
 }
 

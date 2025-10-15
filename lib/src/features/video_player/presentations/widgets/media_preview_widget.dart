@@ -48,6 +48,7 @@ class MediaPreviewWidget extends StatelessWidget {
 
                   /// ✅ New TODO ( Izn ur Rehman ) : Optimize Widget Tree
                   MediaType.video => IconContainer(
+                    onPressed: () {},
                     icon: Icons.play_arrow_rounded,
                     margin: const EdgeInsets.symmetric(
                       horizontal: 25,

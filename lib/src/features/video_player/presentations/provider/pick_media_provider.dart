@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:test_video_player/src/core/services/media_service.dart';
 import 'package:test_video_player/src/features/video_player/data/model/media.dart';
 import 'package:test_video_player/src/features/video_player/presentations/provider/toggle_media_type.dart';
+import 'package:test_video_player/src/utils/enums/media.dart';
 import 'package:video_player/video_player.dart';
 
 part 'pick_media_provider.g.dart';
@@ -18,6 +19,17 @@ Future<List<Media>> pickMedia(Ref ref) async {
   final media = <Media>[];
 
   for (final file in files) {
+    if (mediaType == MediaType.image) {
+      media.add(
+        Media(
+          title: file.name,
+          path: file.path,
+          mediaType: mediaType,
+          duration: Duration.zero,
+        ),
+      );
+      continue;
+    }
     final controller = VideoPlayerController.file(File(file.path));
     await controller.initialize();
     media.add(
